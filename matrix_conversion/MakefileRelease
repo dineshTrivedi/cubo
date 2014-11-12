@@ -17,10 +17,10 @@
 ########################
 
 all:
-	@test -d debug || mkdir debug
-	g++ -c -pipe -g -Wall -W -I. -o debug/main.o main.cpp
-	g++ -o debug/matrix_conversion debug/main.o
+	@test -d release || mkdir release
+	g++ -c -pipe -O2 -Wall -I. -o release/main.o main.cpp
+	g++ -Wl,-O1 -o release/matrix_conversion release/main.o  	
 
 clean:
-	rm -f debug/*.o
-	rm -f debug/matrix_conversion
+	rm -f release/*.o
+	rm -f release/matrix_conversion

@@ -3,10 +3,11 @@
 #include <fstream> 
 #include <string>
 #include <vector>
-#include <time.h>
-#include <stdio.h>
-#include <windows.h>
-
+#include <ctime>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <cinttypes>
 
 #define DEBUG false
 #define ONLINE_DEBUG false
@@ -22,54 +23,54 @@
 
 using namespace std;
 struct cell {
-	__int64 num_trans;
-	__int64 capacity;
-	__int64 *trans;
+    std::int64_t num_trans;
+    std::int64_t capacity;
+    std::int64_t *trans;
 };
 
 struct node {
-	__int64 name;
+    std::int64_t name;
 	node **child;
-	__int64 num_cells;
+    std::int64_t num_cells;
 	cell **cells;
 };
 
 // prototypes
 void read_datafile(char*);
-void fragment(node*, cell*, vector< __int64 >, __int64*, __int64);
-void online_fragment(node*, node*, cell*, vector< __int64 >, __int64*, __int64,__int64*, __int64*, bool);
+void fragment(node*, cell*, vector< std::int64_t >, std::int64_t*, std::int64_t);
+void online_fragment(node*, node*, cell*, vector< std::int64_t >, std::int64_t*, std::int64_t,std::int64_t*, std::int64_t*, bool);
 void intersect(cell*, cell*, cell*);
 void io_intersect(cell*, cell*, cell*);
 void elapsed_time(timeval*);
 void mark_time(timeval*);
 void interfaceM();
 void execute_query(string, bool, bool);
-__int64 stoiM(const string &s);
-void multi_intersect(cell*, cell **, __int64);
-cell* cell_of(int*, __int64);
-cell* online_cell_of(node*, __int64*, __int64, __int64*);
-void free_tree(node*, __int64*, __int64);
-string itos(__int64);
+std::int64_t stoiM(const string &s);
+void multi_intersect(cell*, cell **, std::int64_t);
+cell* cell_of(int*, std::int64_t);
+cell* online_cell_of(node*, std::int64_t*, std::int64_t, std::int64_t*);
+void free_tree(node*, std::int64_t*, std::int64_t);
+string itos(std::int64_t);
 void exp_time_taken(timeval*);
-__int64 gettimeofdayM(struct timeval *tv, struct timezone2 *tz);
+std::int64_t gettimeofdayM(struct timeval *tv, struct timezone2 *tz);
 
 // global vars
-__int64 minsup;
-__int64 n_dimensions;
-__int64 n_tuples;
-__int64 *cardinality;
+std::int64_t minsup;
+std::int64_t n_dimensions;
+std::int64_t n_tuples;
+std::int64_t *cardinality;
 node *root;
 timeval *prev_time;
-__int64 n_frags;
-__int64 frag_size;
-__int64 *frag;
-__int64 *frag_index;
-__int64 num_rows;
-__int64 _IOCOUNT;
-__int64 _IOMAX;
-__int64 _CUBEIO;
+std::int64_t n_frags;
+std::int64_t frag_size;
+std::int64_t *frag;
+std::int64_t *frag_index;
+std::int64_t num_rows;
+std::int64_t _IOCOUNT;
+std::int64_t _IOMAX;
+std::int64_t _CUBEIO;
 
-__int64 numero_coluna;
+std::int64_t numero_coluna;
 
 
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
@@ -80,8 +81,8 @@ __int64 numero_coluna;
 
 struct timezone2 
 {
-  __int64  tz_minuteswest; /* minutes W of Greenwich */
-  __int64  tz_dsttime;     /* type of dst correction */
+  std::int64_t  tz_minuteswest; /* minutes W of Greenwich */
+  std::int64_t  tz_dsttime;     /* type of dst correction */
 };
 
 
@@ -94,8 +95,8 @@ ofstream outfile("output.full");
 
 int main(int argc, char **argv)
 {
-	__int64 *cell_name;
-	vector<__int64 > cuboid_name;
+    std::int64_t *cell_name;
+    vector<std::int64_t > cuboid_name;
 
 	if (argc != 5) {
 		cout << argv[0] << " <datafile> <minsup> <fragment size> <numero_coluna>" << endl;
@@ -117,16 +118,16 @@ int main(int argc, char **argv)
 	// read data file
 	read_datafile(argv[1]);
 
-	cell_name = new __int64[n_dimensions];
-	memset(cell_name, -1, sizeof(__int64) * n_dimensions);
+    cell_name = new std::int64_t[n_dimensions];
+    memset(cell_name, -1, sizeof(std::int64_t) * n_dimensions);
 
 	cout << "Computing shell fragments";
 
 	// for each fragment
-	for (__int64 i = 0; i < root->num_cells; i++) {
+    for (std::int64_t i = 0; i < root->num_cells; i++) {
 
 		// for each node in the fragment
-		for (__int64 j = 0; j < root->child[i]->num_cells; j++) {
+        for (std::int64_t j = 0; j < root->child[i]->num_cells; j++) {
 			cuboid_name.push_back(root->child[i]->child[j]->name);
 			fragment(root->child[i]->child[j], NULL, cuboid_name,
 					cell_name, root->child[i]->num_cells);
@@ -155,7 +156,7 @@ int main(int argc, char **argv)
 void read_datafile(char *filename) 
 {
 	FILE *f;
-	__int64 temp, index, size, word;
+    std::int64_t temp, index, size, word;
 	//char line[MAX_LINE_LENGTH], *word;
 	cell *c;
 
@@ -189,11 +190,11 @@ void read_datafile(char *filename)
 	word = strtok(line, " ");*/
 
 	// store the cardinality and offset of each dimension
-	cardinality = new __int64[n_dimensions];
+    cardinality = new std::int64_t[n_dimensions];
 
 	// read cardinalities
 	int temp2;
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		//word = strtok(NULL, " ");
 		//cardinality[i] = atoi(word) + 1;
 		fread(&temp2, sizeof(int), 1, f);
@@ -202,13 +203,13 @@ void read_datafile(char *filename)
 
 	if (DEBUG) {
 		cout << endl << "cardinality: ";
-		for (__int64 i = 0; i < n_dimensions; i++)
+        for (std::int64_t i = 0; i < n_dimensions; i++)
 			cout << cardinality[i] << " ";
 		cout << endl;
 	}
 
 	// establish the shell fragments
-	n_frags = (__int64) ceil((double) n_dimensions / frag_size);
+    n_frags = (std::int64_t) ceil((double) n_dimensions / frag_size);
 
 	// create the root of the entire forest
 	root = new node;
@@ -220,7 +221,7 @@ void read_datafile(char *filename)
 	index = 0;
 
 	// allocate each cuboid group tree
-	for (__int64 i = 0; i < n_frags; i++) {
+    for (std::int64_t i = 0; i < n_frags; i++) {
 
 		size = frag_size;
 
@@ -238,7 +239,7 @@ void read_datafile(char *filename)
 		root->child[i]->child = new node*[size];
 
 		// now create all the nodes in this fragment
-		for (__int64 j = 0; j < size; j++) {
+        for (std::int64_t j = 0; j < size; j++) {
 			root->child[i]->child[j] = new node;
 			root->child[i]->child[j]->name = index;
 			root->child[i]->child[j]->num_cells = cardinality[index];
@@ -248,7 +249,7 @@ void read_datafile(char *filename)
 
 			// note that this starts at 1 because the generator program
 			// starts at 1.
-			for (__int64 k = 1; k < cardinality[index]; k++) {
+            for (std::int64_t k = 1; k < cardinality[index]; k++) {
 				root->child[i]->child[j]->cells[k] = new cell;
 				root->child[i]->child[j]->cells[k]->num_trans = 0;
 
@@ -257,7 +258,7 @@ void read_datafile(char *filename)
 				root->child[i]->child[j]->cells[k]->capacity = n_tuples /
 					(cardinality[index] - 1);
 				root->child[i]->child[j]->cells[k]->trans = new
-					__int64[root->child[i]->child[j]->cells[k]->capacity];
+                    std::int64_t[root->child[i]->child[j]->cells[k]->capacity];
 			}
 			
 			index++;
@@ -267,13 +268,13 @@ void read_datafile(char *filename)
 	index = -1;
 
 	// keeps track of which fragment each dimension belongs to
-	frag = new __int64[n_dimensions];
+    frag = new std::int64_t[n_dimensions];
 
 	// keeps track of where in each fragment the dimension is
-	frag_index = new __int64[n_dimensions];
+    frag_index = new std::int64_t[n_dimensions];
 
 	// create the fragment indices of each dimension
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (i % frag_size == 0)
 			index++;
 
@@ -285,11 +286,11 @@ void read_datafile(char *filename)
 	cout << "Reading input file";
 
 	// read in all data into the one-dimensional cells
-	for (__int64 i = 0; i < n_tuples; i++) {
+    for (std::int64_t i = 0; i < n_tuples; i++) {
 
 		//word = strtok(line, " ");
 
-		for (__int64 j = 0; j < n_dimensions; j++) {
+        for (std::int64_t j = 0; j < n_dimensions; j++) {
 			//temp = atoi(word);
 			fread(&temp2, sizeof(int), 1, f);
 			temp = temp2;
@@ -300,7 +301,7 @@ void read_datafile(char *filename)
 			// no transaction list yet, make one
 			if (c->capacity == 0) {
 				c->capacity = 4;
-				c->trans = new __int64[4];
+                c->trans = new std::int64_t[4];
 				c->num_trans = 1;
 				c->trans[0] = i;
 			}
@@ -309,16 +310,16 @@ void read_datafile(char *filename)
 				// need to expand the transaction list
 				if (c->num_trans >= c->capacity) {
 
-					__int64 *old = c->trans;
-					__int64 old_size = c->capacity;
+                    std::int64_t *old = c->trans;
+                    std::int64_t old_size = c->capacity;
 
 					// double capacity unless it's too big
 					c->capacity *= 2;
 					if (c->capacity > n_tuples) c->capacity = n_tuples;
 
 					// copy over the older stuff
-					c->trans = new __int64[c->capacity];
-					memcpy(c->trans, old, sizeof(__int64) * old_size);
+                    c->trans = new std::int64_t[c->capacity];
+                    memcpy(c->trans, old, sizeof(std::int64_t) * old_size);
 
 					// delete the older stuff
 					delete[] old;
@@ -334,11 +335,11 @@ void read_datafile(char *filename)
 	}
 
 	// prune transaction lists
-	for (__int64 i = 0; i < root->num_cells; i++) {
+    for (std::int64_t i = 0; i < root->num_cells; i++) {
 
-		for (__int64 j = 0; j < root->child[i]->num_cells; j++) {
+        for (std::int64_t j = 0; j < root->child[i]->num_cells; j++) {
 
-			for (__int64 k = 0; k < root->child[i]->child[j]->num_cells; k++) {
+            for (std::int64_t k = 0; k < root->child[i]->child[j]->num_cells; k++) {
 
 				if (root->child[i]->child[j]->cells[k] != NULL) {
 
@@ -355,12 +356,12 @@ void read_datafile(char *filename)
 					// shrink it down
 					if (c->capacity - c->num_trans > SHRINK) {
 
-						__int64 *old = c->trans;
+                        std::int64_t *old = c->trans;
 
 						// resize and copy over the older stuff
 						c->capacity = c->num_trans;
-						c->trans = new __int64[c->num_trans];
-						memcpy(c->trans, old, sizeof(__int64) * c->num_trans);
+                        c->trans = new std::int64_t[c->num_trans];
+                        memcpy(c->trans, old, sizeof(std::int64_t) * c->num_trans);
 
 						// delete the older stuff
 						delete[] old;
@@ -386,17 +387,17 @@ void read_datafile(char *filename)
 	// print out the one-dimensional cells
 	if (DEBUG) {
 
-		for (__int64 i = 0; i < root->num_cells; i++) {
+        for (std::int64_t i = 0; i < root->num_cells; i++) {
 
-			for (__int64 j = 0; j < root->child[i]->num_cells; j++) {
+            for (std::int64_t j = 0; j < root->child[i]->num_cells; j++) {
 
-				for (__int64 k = 0; k < root->child[i]->child[j]->num_cells; k++) {
+                for (std::int64_t k = 0; k < root->child[i]->child[j]->num_cells; k++) {
 
 					if (root->child[i]->child[j]->cells[k] == NULL)
 						cout << endl;
 					else {
 						cout << "(" << i << ", " << j << ", " << k << ") -> ";
-						for (__int64 u = 0; u < root->child[i]->child[j]->cells[k]->num_trans; u++)
+                        for (std::int64_t u = 0; u < root->child[i]->child[j]->cells[k]->num_trans; u++)
 							cout << root->child[i]->child[j]->cells[k]->trans[u] << " ";
 						cout << endl;
 					}
@@ -410,20 +411,20 @@ void read_datafile(char *filename)
 	return;
 }
 
-void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
-		__int64 *cell_name, __int64 n_dim)
+void fragment(node *my_root, cell *parent_cell, vector< std::int64_t > cuboid_name,
+        std::int64_t *cell_name, std::int64_t n_dim)
 {
-	__int64 num_children, cell_offset, temp, last_name;
+    std::int64_t num_children, cell_offset, temp, last_name;
 	cell *c;
 
 	if (DEBUG) {
 		cout << endl << "cut starting at" << endl;
 		cout << "\tcuboid: ";
-		for (unsigned __int64 i = 0; i < cuboid_name.size(); i++)
+        for (std::uint64_t i = 0; i < cuboid_name.size(); i++)
 			cout << cuboid_name[i] << " ";
 		cout << endl;
 		cout << "\tcell  : ";
-		for (__int64 i = 0; i < n_dimensions; i++) {
+        for (std::int64_t i = 0; i < n_dimensions; i++) {
 			if (cell_name[i] == -1)
 				cout << "* ";
 			else
@@ -441,7 +442,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 		if (my_root->num_cells <= 0) {
 			my_root->num_cells = 1;
 
-			for (unsigned __int64 i = 0; i < cuboid_name.size(); i++)
+            for (std::uint64_t i = 0; i < cuboid_name.size(); i++)
 				my_root->num_cells *= cardinality[cuboid_name[i]];
 
 			my_root->cells = new cell*[my_root->num_cells];
@@ -451,12 +452,12 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 		}
 
 		// compute cell offset
-		for (unsigned __int64 i = 0; i < cuboid_name.size(); i++) {
+        for (std::uint64_t i = 0; i < cuboid_name.size(); i++) {
 
 			if (cell_name[cuboid_name[i]] != -1) {
 
 				temp = 1;
-				for (unsigned __int64 j = i + 1; j < cuboid_name.size(); j++)
+                for (std::uint64_t j = i + 1; j < cuboid_name.size(); j++)
 					temp *= cardinality[cuboid_name[j]];
 
 				cell_offset += temp * cell_name[cuboid_name[i]];
@@ -467,7 +468,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 			cout << "cell_offset = " << cell_offset << endl;
 
 		// aggregate all my cells with my parent cell
-		for (__int64 i = cell_offset + 1; i < cardinality[last_name] +
+        for (std::int64_t i = cell_offset + 1; i < cardinality[last_name] +
 				cell_offset; i++) {
 
 			my_root->cells[i] = new cell;
@@ -480,16 +481,16 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 			if (DEBUG) {
 				cout << "intersecting:" << endl;
 				cout << "[" << parent_cell->num_trans << "]: ";
-				for (__int64 j = 0; j < parent_cell->num_trans; j++)
+                for (std::int64_t j = 0; j < parent_cell->num_trans; j++)
 					cout << parent_cell->trans[j] << " ";
 				cout << endl;
 				cout << "[" << c->num_trans << "]: ";
-				for (__int64 j = 0; j < c->num_trans; j++)
+                for (std::int64_t j = 0; j < c->num_trans; j++)
 					cout << c->trans[j] << " ";
 				cout << endl;
 				cout << "result: ";
 				cout << "[" << my_root->cells[i]->num_trans << "]: ";
-				for (__int64 j = 0; j < my_root->cells[i]->num_trans; j++)
+                for (std::int64_t j = 0; j < my_root->cells[i]->num_trans; j++)
 					cout << my_root->cells[i]->trans[j] << " ";
 				cout << endl;
 			}
@@ -512,7 +513,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 
 			my_root->child = new node*[num_children];
 
-			for (__int64 i = 0; i < num_children; i++) {
+            for (std::int64_t i = 0; i < num_children; i++) {
 				my_root->child[i] = new node;
 				my_root->child[i]->name = my_root->name + i + 1;
 				my_root->child[i]->num_cells = 0;
@@ -525,7 +526,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 	}
 
 	// for all my cells
-	for (__int64 i = cell_offset + 1; i < cardinality[last_name] +
+    for (std::int64_t i = cell_offset + 1; i < cardinality[last_name] +
 			cell_offset; i++) {
 
 		c = my_root->cells[i];
@@ -548,7 +549,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 
 			if (DEBUG) {
 				cout << "cell ";
-				for (__int64 u = 0; u < n_dimensions; u++) {
+                for (std::int64_t u = 0; u < n_dimensions; u++) {
 					if (cell_name[u] == -1)
 						cout << "* ";
 					else
@@ -558,7 +559,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 			}
 
 			// recursive call for all my children (if any)
-			for (__int64 j = 0; j < num_children; j++) {
+            for (std::int64_t j = 0; j < num_children; j++) {
 				cuboid_name.push_back(my_root->child[j]->name);
 				fragment(my_root->child[j], c, cuboid_name, cell_name, n_dim);
 				cuboid_name.pop_back();
@@ -572,7 +573,7 @@ void fragment(node *my_root, cell *parent_cell, vector< __int64 > cuboid_name,
 void intersect(cell *target, cell *a, cell *b)
 {
 	cell *smallM, *big;
-	__int64 size;
+    std::int64_t size;
 
 	if (a->num_trans < b->num_trans) {
 		size = a->num_trans;
@@ -593,14 +594,14 @@ void intersect(cell *target, cell *a, cell *b)
 		return;
 	}
 
-	target->trans = new __int64[size];
+    target->trans = new std::int64_t[size];
 	target->num_trans = 0;
 	target->capacity = size;
 
-	__int64 j = 0;
+    std::int64_t j = 0;
 
 	// intersect
-	for (__int64 i = 0; i < smallM->num_trans; i++) {
+    for (std::int64_t i = 0; i < smallM->num_trans; i++) {
 
 		// look-ahead heuristic
 		if (j + LOOK < big->num_trans && 
@@ -635,12 +636,12 @@ void intersect(cell *target, cell *a, cell *b)
 	// shrink down transaction list if capacity is too big
 	if (target->capacity - target->num_trans > SHRINK) {
 
-		__int64 *old = target->trans;
+        std::int64_t *old = target->trans;
 
 		// resize and copy over the older stuff
 		target->capacity = target->num_trans;
-		target->trans = new __int64[target->num_trans];
-		memcpy(target->trans, old, sizeof(__int64) * target->num_trans);
+        target->trans = new std::int64_t[target->num_trans];
+        memcpy(target->trans, old, sizeof(std::int64_t) * target->num_trans);
 
 		// delete the older stuff
 		delete[] old;
@@ -650,7 +651,7 @@ void intersect(cell *target, cell *a, cell *b)
 void io_intersect(cell *target, cell *a, cell *b)
 {
 	cell *smallM, *big;
-	__int64 size = a->num_trans;
+    std::int64_t size = a->num_trans;
 
 	smallM = b;
 	big = a;
@@ -663,16 +664,16 @@ void io_intersect(cell *target, cell *a, cell *b)
 		return;
 	}
 
-	target->trans = new __int64[size];
+    target->trans = new std::int64_t[size];
 	target->num_trans = 0;
 	target->capacity = size;
 
-	__int64 j = 0;
-	__int64 mod = -1;
-	__int64 mod_other = -1;
+    std::int64_t j = 0;
+    std::int64_t mod = -1;
+    std::int64_t mod_other = -1;
 
 	// intersect
-	for (__int64 i = 0; i < smallM->num_trans; i++) {
+    for (std::int64_t i = 0; i < smallM->num_trans; i++) {
 
 		if (i / 1024 != mod_other) {
 			_IOMAX++;
@@ -718,12 +719,12 @@ void io_intersect(cell *target, cell *a, cell *b)
 	// shrink down transaction list if capacity is too big
 	if (target->capacity - target->num_trans > SHRINK) {
 
-		__int64 *old = target->trans;
+        std::int64_t *old = target->trans;
 
 		// resize and copy over the older stuff
 		target->capacity = target->num_trans;
-		target->trans = new __int64[target->num_trans];
-		memcpy(target->trans, old, sizeof(__int64) * target->num_trans);
+        target->trans = new std::int64_t[target->num_trans];
+        memcpy(target->trans, old, sizeof(std::int64_t) * target->num_trans);
 
 		// delete the older stuff
 		delete[] old;
@@ -731,14 +732,14 @@ void io_intersect(cell *target, cell *a, cell *b)
 }
 
 
-void multi_intersect(cell *target, cell **sources, __int64 num_sources)
+void multi_intersect(cell *target, cell **sources, std::int64_t num_sources)
 {
-	__int64 *index = new __int64[num_sources];
-	__int64 size = n_tuples + 1;
-	__int64 smallest_source = -1;
+    std::int64_t *index = new std::int64_t[num_sources];
+    std::int64_t size = n_tuples + 1;
+    std::int64_t smallest_source = -1;
 	bool all_equal, done;
 
-	for (__int64 i = 0; i < num_sources; i++) {
+    for (std::int64_t i = 0; i < num_sources; i++) {
 		if (sources[i] != NULL) {
 			if (sources[i]->num_trans < size) {
 				size = sources[i]->num_trans;
@@ -755,17 +756,17 @@ void multi_intersect(cell *target, cell **sources, __int64 num_sources)
 		return;
 	}
 	else {
-		target->trans = new __int64[size];
+        target->trans = new std::int64_t[size];
 		target->num_trans = 0;
 		target->capacity = size;
 	}
 
-	memset(index, 0, sizeof(__int64) * num_sources);
+    memset(index, 0, sizeof(std::int64_t) * num_sources);
 	done = false;
 
-	for (__int64 i = 0; i < size; i++) {
+    for (std::int64_t i = 0; i < size; i++) {
 
-		for (__int64 j = 0; j < num_sources; j++) {
+        for (std::int64_t j = 0; j < num_sources; j++) {
 			if (sources[j] != NULL) {
 				while (sources[j]->trans[index[j]] <
 						sources[smallest_source]->trans[i] && index[j] <
@@ -778,7 +779,7 @@ void multi_intersect(cell *target, cell **sources, __int64 num_sources)
 
 		all_equal = true;
 
-		for (__int64 j = 0; j < num_sources; j++) {
+        for (std::int64_t j = 0; j < num_sources; j++) {
 			if (sources[j] != NULL && sources[j]->trans[index[j]] !=
 					sources[smallest_source]->trans[i])
 				all_equal = false;
@@ -789,13 +790,13 @@ void multi_intersect(cell *target, cell **sources, __int64 num_sources)
 				sources[smallest_source]->trans[i];
 			target->num_trans++;
 
-			for (__int64 j = 0; j < num_sources; j++) {
+            for (std::int64_t j = 0; j < num_sources; j++) {
 				if (sources[j] != NULL)
 					index[j]++;
 			}
 		}
 
-		for (__int64 j = 0; j < num_sources; j++) {
+        for (std::int64_t j = 0; j < num_sources; j++) {
 			if (sources[j] != NULL && index[j] == sources[j]->num_trans)
 				done = true;
 		}
@@ -816,14 +817,14 @@ void multi_intersect(cell *target, cell **sources, __int64 num_sources)
 
 		//cout << "shrinking by " << target->capacity - target->num_trans << endl;
 
-		__int64 *old = target->trans;
+        std::int64_t *old = target->trans;
 
 		// resize
 		target->capacity = target->num_trans;
 
 		// copy over the older stuff
-		target->trans = new __int64[target->num_trans];
-		memcpy(target->trans, old, sizeof(__int64) * target->num_trans);
+        target->trans = new std::int64_t[target->num_trans];
+        memcpy(target->trans, old, sizeof(std::int64_t) * target->num_trans);
 
 		// delete the older stuff
 		delete[] old;
@@ -833,9 +834,9 @@ void multi_intersect(cell *target, cell **sources, __int64 num_sources)
 }
 
 
-cell* cell_of(__int64 *cell_name, __int64 name_size)
+cell* cell_of(std::int64_t *cell_name, std::int64_t name_size)
 {
-	__int64 j, offset, temp;
+    std::int64_t j, offset, temp;
 	bool at_root = true;
 	node *n;
 
@@ -849,7 +850,7 @@ cell* cell_of(__int64 *cell_name, __int64 name_size)
 	j = 0;
 	offset = 0;
 
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 
 		// traverse down the tree and locate the node
 		if (cell_name[i] != -1) {
@@ -872,13 +873,13 @@ cell* cell_of(__int64 *cell_name, __int64 name_size)
 		if (j == name_size) {
 
 			// calculate the offset of the cell within this node
-			for (__int64 u = 0; u < n_dimensions; u++) {
+            for (std::int64_t u = 0; u < n_dimensions; u++) {
 
 				if (cell_name[u] > 0) {
 
 					temp = 1;
 
-					for (__int64 v = u + 1; v < n_dimensions; v++) {
+                    for (std::int64_t v = u + 1; v < n_dimensions; v++) {
 
 						if (cell_name[v] != -1) {
 							temp *= cardinality[v];
@@ -895,7 +896,7 @@ cell* cell_of(__int64 *cell_name, __int64 name_size)
 
 	// should never get here
 	cout << "Invalid cell_of()!" << endl;
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (cell_name[i] == -1)
 			cout << "* ";
 		else
@@ -905,10 +906,10 @@ cell* cell_of(__int64 *cell_name, __int64 name_size)
 	return NULL;
 }
 
-cell* online_cell_of(node *local_root, __int64 *cell_name, __int64 name_size,
-		__int64 *local_name)
+cell* online_cell_of(node *local_root, std::int64_t *cell_name, std::int64_t name_size,
+        std::int64_t *local_name)
 {
-	__int64 j, offset, temp;
+    std::int64_t j, offset, temp;
 	node *n = local_root;
 	bool at_root = true;
 
@@ -916,7 +917,7 @@ cell* online_cell_of(node *local_root, __int64 *cell_name, __int64 name_size,
 	offset = 0;
 
 	// for all characters in the name
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 
 		// traverse down the tree if the character is non-empty
 		if (cell_name[i] != -1) {
@@ -938,13 +939,13 @@ cell* online_cell_of(node *local_root, __int64 *cell_name, __int64 name_size,
 		if (j == name_size) {
 
 			// calculate the offset of the cell within this node
-			for (__int64 u = 0; u < n_dimensions; u++) {
+            for (std::int64_t u = 0; u < n_dimensions; u++) {
 
 				if (cell_name[u] > 0) {
 
 					temp = 1;
 
-					for (__int64 v = u + 1; v < n_dimensions; v++) {
+                    for (std::int64_t v = u + 1; v < n_dimensions; v++) {
 
 						if (cell_name[v] != -1) {
 							temp *= cardinality[v];
@@ -961,7 +962,7 @@ cell* online_cell_of(node *local_root, __int64 *cell_name, __int64 name_size,
 
 	// should never get here
 	cout << "Invalid online_cell_of()!" << endl;
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (cell_name[i] == -1)
 			cout << "* ";
 		else
@@ -1066,12 +1067,12 @@ void interfaceM()
 		// experiments
 		else if (word == "exp") {
 
-			__int64 *query_value = new __int64[NUM_DIMS];
-			__int64 num_ins, num_inq;
-			__int64 r;
-			__int64 value;
+            std::int64_t *query_value = new std::int64_t[NUM_DIMS];
+            std::int64_t num_ins, num_inq;
+            std::int64_t r;
+            std::int64_t value;
 			string que;
-			__int64 total_rows = 0;
+            std::int64_t total_rows = 0;
 
 			srand(1);
 
@@ -1081,23 +1082,23 @@ void interfaceM()
 			_CUBEIO = 0;
 
 			// do NUM_QUERIES queries
-			for (__int64 i = 0; i < NUM_QUERIES; i++) {
+            for (std::int64_t i = 0; i < NUM_QUERIES; i++) {
 
 				num_ins = 0;
 				num_inq = 0;
 
 				// all irrelevant dimensions to begin with
-				for (__int64 i = 0; i < NUM_DIMS; i++) 
+                for (std::int64_t i = 0; i < NUM_DIMS; i++)
 					query_value[i] = -2;
 
 				// mark the instantiated dimensions
 				while (num_ins < NUM_INS) {
 
-					r = (__int64) ((double) NUM_DIMS * rand() / RAND_MAX);
+                    r = (std::int64_t) ((double) NUM_DIMS * rand() / RAND_MAX);
 					if (r == NUM_DIMS) r = 0;
 
 					if (query_value[r] == -2) {
-						value = (__int64) ((double) CARD * rand() / RAND_MAX);
+                        value = (std::int64_t) ((double) CARD * rand() / RAND_MAX);
 						if (value == 0) value = 10;
 						query_value[r] = value;
 						num_ins++;
@@ -1107,7 +1108,7 @@ void interfaceM()
 				// mark the inquired dimensions
 				while (num_inq < NUM_INQ) {
 
-					r = (__int64) ((double) NUM_DIMS * rand() / RAND_MAX);
+                    r = (std::int64_t) ((double) NUM_DIMS * rand() / RAND_MAX);
 					if (r == NUM_DIMS) r = 0;
 
 					if (query_value[r] == -2) {
@@ -1116,14 +1117,14 @@ void interfaceM()
 					}
 				}
 
-				__int64 _CUBEIO_TEMP = 951483 * 8 / 1024;
+                std::int64_t _CUBEIO_TEMP = 951483 * 8 / 1024;
 				bool stop = false;
 
 				// make the query string
 				que = "q";
 
 				// make the query string
-				for (__int64 i = 0; i < NUM_DIMS; i++) {
+                for (std::int64_t i = 0; i < NUM_DIMS; i++) {
 
 					// irrelevant
 					if (query_value[i] == -2) {
@@ -1176,9 +1177,9 @@ void interfaceM()
 }
 
 // converts a string to an integer 
-__int64 stoiM(const string &s)
+std::int64_t stoiM(const string &s)
 {
-	__int64 result;
+    std::int64_t result;
 	istringstream(s) >> result;
 	return result;
 }
@@ -1187,7 +1188,7 @@ __int64 stoiM(const string &s)
 void execute_query(string query, bool verbose, bool file_out)
 {
 	string word;
-	__int64 n_dims, *query_cell;
+    std::int64_t n_dims, *query_cell;
 	bool empty_result;
 
 	istringstream iss(query);
@@ -1196,7 +1197,7 @@ void execute_query(string query, bool verbose, bool file_out)
 	iss >> word;
 
 	n_dims = 0;
-	query_cell = new __int64[n_dimensions];
+    query_cell = new std::int64_t[n_dimensions];
 
 	// read in the query values
 	while (iss >> word) { 
@@ -1223,7 +1224,7 @@ void execute_query(string query, bool verbose, bool file_out)
 	if (file_out) {
 		//outfile << endl << "    Executing query: ";
 		outfile << "Executing query: ";
-		for (__int64 i = 0; i < n_dimensions; i++) {
+        for (std::int64_t i = 0; i < n_dimensions; i++) {
 			if (query_cell[i] == -1)
 				outfile << "* ";
 			else if (query_cell[i] == -2)
@@ -1236,7 +1237,7 @@ void execute_query(string query, bool verbose, bool file_out)
 	}
 	else {
 		cout << endl << "    Executing query: ";
-		for (__int64 i = 0; i < n_dimensions; i++) {
+        for (std::int64_t i = 0; i < n_dimensions; i++) {
 			if (query_cell[i] == -1)
 				cout << "* ";
 			else if (query_cell[i] == -2)
@@ -1251,7 +1252,7 @@ void execute_query(string query, bool verbose, bool file_out)
 
 	// make sure the query is not asking for a value that is too big or
 	// too small
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (query_cell[i] >= cardinality[i] || query_cell[i] < -2) {
 			cout << "Invalid query value at dimension " << i << "." << endl;
 			empty_result = true;
@@ -1268,10 +1269,10 @@ void execute_query(string query, bool verbose, bool file_out)
 	//  the actual query processing starts here  //
 	//===========================================//
 
-	__int64 *cell_name, cell_size, num_variables, num_instantiated;
+    std::int64_t *cell_name, cell_size, num_variables, num_instantiated;
 	cell **group_cells, *fixed_results;
 
-	cell_name = new __int64[n_dimensions];
+    cell_name = new std::int64_t[n_dimensions];
 	group_cells = new cell*[n_frags];
 	fixed_results = new cell;
 	fixed_results->num_trans = 0;
@@ -1279,7 +1280,7 @@ void execute_query(string query, bool verbose, bool file_out)
 	num_instantiated = 0;
 
 	// count the number of inquired and instantiated dimensions
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (query_cell[i] == -2) num_variables++;
 		if (query_cell[i] >= 0) num_instantiated++;
 	}
@@ -1288,12 +1289,12 @@ void execute_query(string query, bool verbose, bool file_out)
 	if (num_instantiated > 0) {
 
 		// locate the fixed shell fragments
-		for (__int64 i = 0; i < n_frags; i++) {
-			memset(cell_name, -1, sizeof(__int64) * n_dimensions);
+        for (std::int64_t i = 0; i < n_frags; i++) {
+            memset(cell_name, -1, sizeof(std::int64_t) * n_dimensions);
 			cell_size = 0;
 
 			// for all the queries in this fragment
-			for (__int64 j = 0; j < root->child[i]->num_cells; j++) {
+            for (std::int64_t j = 0; j < root->child[i]->num_cells; j++) {
 
 				// if this fragment has a instantiated value, mark it
 				if (query_cell[root->child[i]->child[j]->name] >= 0) {
@@ -1313,7 +1314,7 @@ void execute_query(string query, bool verbose, bool file_out)
 
 				if (ONLINE_DEBUG) {
 					cout << "instantiated cell: ";
-					for (__int64 u = 0; u < n_dimensions; u++) {
+                    for (std::int64_t u = 0; u < n_dimensions; u++) {
 						if (cell_name[u] == -1)
 							cout << "* ";
 						else
@@ -1326,7 +1327,7 @@ void execute_query(string query, bool verbose, bool file_out)
 
 				// count I/O of fetching the tidlist
 				double io = group_cells[i]->num_trans / 1024.0;
-				_IOMAX += (__int64) ceil(io);
+                _IOMAX += (std::int64_t) ceil(io);
 			}
 			else 
 				// this fragment has no instantiated values
@@ -1376,7 +1377,7 @@ void execute_query(string query, bool verbose, bool file_out)
 		}
 		else {
 			cout << "    ";
-			for (__int64 i = 0; i < n_dimensions; i++) {
+            for (std::int64_t i = 0; i < n_dimensions; i++) {
 				if (query_cell[i] == -1)
 					cout << "* ";
 				else if (query_cell[i] == -2)
@@ -1404,8 +1405,8 @@ void execute_query(string query, bool verbose, bool file_out)
 
 	node *local_root;
 	cell *c, *temp;
-	__int64 *local_name, *local_order, index;
-	vector< __int64 > cuboid_name;
+    std::int64_t *local_name, *local_order, index;
+    vector< std::int64_t > cuboid_name;
 
 	// create local cube's root
 	local_root = new node;
@@ -1415,8 +1416,8 @@ void execute_query(string query, bool verbose, bool file_out)
 	local_root->cells = new cell*[1];
 	local_root->cells[0] = fixed_results;
 
-	local_name = new __int64[n_dimensions];
-	local_order = new __int64[num_variables];
+    local_name = new std::int64_t[n_dimensions];
+    local_order = new std::int64_t[num_variables];
 
 	// do the base cuboid if computing full cube
 	if (num_variables == n_dimensions || num_instantiated == 0) {
@@ -1442,7 +1443,7 @@ void execute_query(string query, bool verbose, bool file_out)
 	}
 	else {
 		cout << "    ";
-		for (__int64 i = 0; i < n_dimensions; i++) {
+        for (std::int64_t i = 0; i < n_dimensions; i++) {
 			if (query_cell[i] == -1)
 				cout << "* ";
 			else if (query_cell[i] == -2)
@@ -1454,13 +1455,13 @@ void execute_query(string query, bool verbose, bool file_out)
 	}
 
 	index = 0;
-	memset(local_name, -1, sizeof(__int64) * n_dimensions);
+    memset(local_name, -1, sizeof(std::int64_t) * n_dimensions);
 
 	//_IOCOUNT = 0;
 	//_IOMAX = 0;
 
 	// create the local cube's 1-dimensional cuboids
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 
 		// found a variable, make its node under local root
 		if (query_cell[i] == -2) {
@@ -1479,7 +1480,7 @@ void execute_query(string query, bool verbose, bool file_out)
 			local_root->child[index]->child = NULL;
 
 			// populate the cells for this node
-			for (__int64 k = 1; k < cardinality[i]; k++) {
+            for (std::int64_t k = 1; k < cardinality[i]; k++) {
 				local_root->child[index]->cells[k] = new cell;
 				c = local_root->child[index]->cells[k];
 				temp = root->child[frag[i]]->child[frag_index[i]]->cells[k];
@@ -1491,8 +1492,8 @@ void execute_query(string query, bool verbose, bool file_out)
 						num_instantiated == 0) {
 					c->capacity = temp->num_trans;
 					c->num_trans = c->capacity;
-					c->trans = new __int64[c->capacity];
-					memcpy(c->trans, temp->trans, sizeof(__int64) * c->capacity);
+                    c->trans = new std::int64_t[c->capacity];
+                    memcpy(c->trans, temp->trans, sizeof(std::int64_t) * c->capacity);
 				}
 				// intersect with local base cuboid
 				else {
@@ -1512,7 +1513,7 @@ void execute_query(string query, bool verbose, bool file_out)
 
 	if (ONLINE_DEBUG) {
 		cout << "local_name: ";
-		for (__int64 u = 0; u < n_dimensions; u++) {
+        for (std::int64_t u = 0; u < n_dimensions; u++) {
 			if (local_name[u] == -1)
 				cout << "* ";
 			else
@@ -1520,22 +1521,22 @@ void execute_query(string query, bool verbose, bool file_out)
 		}
 		cout << endl;
 		cout << "local_order: ";
-		for (__int64 u = 0; u < num_variables; u++) {
+        for (std::int64_t u = 0; u < num_variables; u++) {
 			cout << local_order[u] << " ";
 		}
 		cout << endl;
 	}
 
-	memset(cell_name, -1, sizeof(__int64) * n_dimensions);
+    memset(cell_name, -1, sizeof(std::int64_t) * n_dimensions);
 	cuboid_name.reserve(num_variables);
 
-	for (__int64 i = 0; i < n_dimensions; i++) {
+    for (std::int64_t i = 0; i < n_dimensions; i++) {
 		if (query_cell[i] >= 0)
 			cell_name[i] = query_cell[i];
 	}
 
 	// do the local data cube
-	for (__int64 i = 0; i < local_root->num_cells; i++) {
+    for (std::int64_t i = 0; i < local_root->num_cells; i++) {
 		cuboid_name.push_back(local_root->child[i]->name);
 		online_fragment(local_root, local_root->child[i], NULL,
 				cuboid_name, cell_name, num_variables, local_name,
@@ -1557,21 +1558,21 @@ void execute_query(string query, bool verbose, bool file_out)
 
 
 void online_fragment(node *local_root, node *my_root, cell *parent_cell,
-		vector< __int64 > cuboid_name, __int64 *cell_name, __int64 n_dim, __int64
-		*local_name, __int64 *local_order, bool file_out)
+        vector< std::int64_t > cuboid_name, std::int64_t *cell_name, std::int64_t n_dim, std::int64_t
+        *local_name, std::int64_t *local_order, bool file_out)
 {
-	__int64 num_children, cell_offset, temp, last_name;
+    std::int64_t num_children, cell_offset, temp, last_name;
 	cell *c;
 	bool meet_minsup = true;
 
 	if (ONLINE_DEBUG) {
 		cout << "online_fragment starting at" << endl;
 		cout << "\tcuboid: ";
-		for (unsigned __int64 i = 0; i < cuboid_name.size(); i++)
+        for (std::uint64_t i = 0; i < cuboid_name.size(); i++)
 			cout << cuboid_name[i] << " ";
 		cout << endl;
 		cout << "\tcell  : ";
-		for (__int64 i = 0; i < n_dimensions; i++) {
+        for (std::int64_t i = 0; i < n_dimensions; i++) {
 			if (cell_name[i] == -1)
 				cout << "* ";
 			else
@@ -1589,12 +1590,12 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 		if (my_root->num_cells <= 0) {
 			my_root->num_cells = 1;
 
-			for (unsigned __int64 i = 0; i < cuboid_name.size(); i++)
+            for (std::uint64_t i = 0; i < cuboid_name.size(); i++)
 				my_root->num_cells *= cardinality[cuboid_name[i]];
 
 			my_root->cells = new cell*[my_root->num_cells];
 
-			for (__int64 i = 0; i < my_root->num_cells; i++)
+            for (std::int64_t i = 0; i < my_root->num_cells; i++)
 				my_root->cells[i] = NULL;
 
 			if (ONLINE_DEBUG)
@@ -1602,12 +1603,12 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 		}
 
 		// compute cell offset within this node
-		for (unsigned __int64 i = 0; i < cuboid_name.size(); i++) {
+        for (std::uint64_t i = 0; i < cuboid_name.size(); i++) {
 
 			if (cell_name[cuboid_name[i]] != -1) {
 
 				temp = 1;
-				for (unsigned __int64 j = i + 1; j < cuboid_name.size(); j++)
+                for (std::uint64_t j = i + 1; j < cuboid_name.size(); j++)
 					temp *= cardinality[cuboid_name[j]];
 
 				cell_offset += temp * cell_name[cuboid_name[i]];
@@ -1620,22 +1621,22 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 		}
 
 
-		__int64 same_frag, *same_frag_cell_name, j, cell_size;
+        std::int64_t same_frag, *same_frag_cell_name, j, cell_size;
 		cell *same_cell, *unsame_cell;
 
 		same_cell = NULL;
 		unsame_cell = NULL;
 		cell_size = 0;
 		same_frag = 0;
-		same_frag_cell_name = new __int64[n_dimensions];
+        same_frag_cell_name = new std::int64_t[n_dimensions];
 
 		// if we're computing the full data cube, we should use the
 		// shell fragments to our advantage.
 		if (n_dim == n_dimensions) {
 
-			memset(same_frag_cell_name, -1, sizeof(__int64) * n_dimensions);
+            memset(same_frag_cell_name, -1, sizeof(std::int64_t) * n_dimensions);
 
-			for (unsigned __int64 i = 0; i < cuboid_name.size(); i++) {
+            for (std::uint64_t i = 0; i < cuboid_name.size(); i++) {
 				if (cell_name[cuboid_name[i]] != -1) {
 					same_frag_cell_name[cuboid_name[i]] =
 						cell_name[cuboid_name[i]];
@@ -1665,11 +1666,11 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 				// fragments.  fetch their stored answer and intersect
 				// with the rest.
 
-				if ((__int64) cuboid_name.size() - same_frag - 1 > 0) {
+                if ((std::int64_t) cuboid_name.size() - same_frag - 1 > 0) {
 
 					if (ONLINE_DEBUG) {
 						cout << "unsame cell: ";
-						for (__int64 u = 0; u < n_dimensions; u++) {
+                        for (std::int64_t u = 0; u < n_dimensions; u++) {
 							if (same_frag_cell_name[u] == -1)
 								cout << "* ";
 							else
@@ -1692,7 +1693,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 
 		meet_minsup = false;
 
-		memset(same_frag_cell_name, -1, sizeof(__int64) * n_dimensions);
+        memset(same_frag_cell_name, -1, sizeof(std::int64_t) * n_dimensions);
 
 		j = cuboid_name.size() - 2;
 
@@ -1703,7 +1704,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 		}
 
 		// aggregate all my cells with my parent cell
-		for (__int64 i = cell_offset + 1; i < cardinality[last_name] +
+        for (std::int64_t i = cell_offset + 1; i < cardinality[last_name] +
 				cell_offset; i++) {
 
 			my_root->cells[i] = new cell;
@@ -1718,7 +1719,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 
 				if (ONLINE_DEBUG) {
 					cout << "same cell: ";
-					for (__int64 u = 0; u < n_dimensions; u++) {
+                    for (std::int64_t u = 0; u < n_dimensions; u++) {
 						if (same_frag_cell_name[u] == -1)
 							cout << "* ";
 						else
@@ -1734,9 +1735,9 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 					if (local_root->cells[0]->num_trans == n_tuples) {
 						my_root->cells[i]->num_trans = same_cell->num_trans;
 						my_root->cells[i]->capacity = same_cell->num_trans;
-						my_root->cells[i]->trans = new __int64[same_cell->num_trans];
+                        my_root->cells[i]->trans = new std::int64_t[same_cell->num_trans];
 						memcpy(my_root->cells[i]->trans,
-								same_cell->trans, sizeof(__int64) *
+                                same_cell->trans, sizeof(std::int64_t) *
 								same_cell->num_trans);
 					}
 					else {
@@ -1802,7 +1803,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 			// create my children nodes
 			my_root->child = new node*[num_children];
 
-			for (__int64 i = 0; i < num_children; i++) {
+            for (std::int64_t i = 0; i < num_children; i++) {
 				my_root->child[i] = new node;
 				my_root->child[i]->name = local_order[local_name[my_root->name] + i + 1];
 				my_root->child[i]->num_cells = 0;
@@ -1815,7 +1816,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 	}
 
 	// for all my cells
-	for (__int64 i = cell_offset + 1; i < cardinality[last_name] +
+    for (std::int64_t i = cell_offset + 1; i < cardinality[last_name] +
 			cell_offset; i++) {
 
 		c = my_root->cells[i];
@@ -1827,7 +1828,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 
 			if (ONLINE_DEBUG) {
 				cout << "cell ";
-				for (__int64 u = 0; u < n_dimensions; u++) {
+                for (std::int64_t u = 0; u < n_dimensions; u++) {
 					if (cell_name[u] == -1)
 						cout << "* ";
 					else
@@ -1851,7 +1852,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 			}
 			else {
 				cout << "    ";
-				for (__int64 u = 0; u < n_dimensions; u++) {
+                for (std::int64_t u = 0; u < n_dimensions; u++) {
 					if (cell_name[u] == -1)
 						cout << "* ";
 					else
@@ -1863,7 +1864,7 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 			num_rows++;
 
 			// recursive call for all my children (if any)
-			for (__int64 j = 0; j < num_children; j++) {
+            for (std::int64_t j = 0; j < num_children; j++) {
 				cuboid_name.push_back(my_root->child[j]->name);
 				online_fragment(local_root, my_root->child[j], c,
 						cuboid_name, cell_name, n_dim, local_name,
@@ -1876,16 +1877,16 @@ void online_fragment(node *local_root, node *my_root, cell *parent_cell,
 	}
 }
 
-void free_tree(node *n, __int64 *local_name, __int64 n_dim)
+void free_tree(node *n, std::int64_t *local_name, std::int64_t n_dim)
 {
 	if (n == NULL)
 		return;
 
-	__int64 num_children = n_dim - 1 - local_name[n->name];
+    std::int64_t num_children = n_dim - 1 - local_name[n->name];
 
 	if (n->name == -500) num_children = n_dim;
 
-	for (__int64 i = 0; i < num_children; i++) {
+    for (std::int64_t i = 0; i < num_children; i++) {
 		free_tree(n->child[i], local_name, n_dim);
 	}
 
@@ -1896,7 +1897,7 @@ void free_tree(node *n, __int64 *local_name, __int64 n_dim)
 		}
 	}
 	else {
-		for (__int64 j = 0; j < n->num_cells; j++) {
+        for (std::int64_t j = 0; j < n->num_cells; j++) {
 			if (n->cells[j] != NULL && n->cells[j]->num_trans > 0) {
 				delete[] n->cells[j]->trans;
 				delete n->cells[j];
@@ -1913,18 +1914,18 @@ void free_tree(node *n, __int64 *local_name, __int64 n_dim)
 	delete n;
 }
 
-string itos(__int64 n)
+string itos(std::int64_t n)
 {
 	ostringstream o;
 	o << n; 
 	return o.str();
 }
 
-__int64 gettimeofdayM(struct timeval *tv, struct timezone2 *tz)
+std::int64_t gettimeofdayM(struct timeval *tv, struct timezone2 *tz)
 {
   FILETIME ft;
-  unsigned __int64 tmpres = 0;
-  static __int64 tzflag;
+  std::uint64_t tmpres = 0;
+  static std::int64_t tzflag;
 
   if (NULL != tv)
   {

@@ -11,8 +11,6 @@ using namespace std;
 #define LOGLEVEL 0
 static unsigned int QTD_COLUNAS = 5;
 static unsigned int QTD_LINHAS = 1000000;
-//const static char* arquivoBinario = "data_binario";
-//const static char* PLAIN_TEXT = "datas";
 
 static string PLAIN_TEXT("datas");
 static string arquivoBinario;
@@ -37,7 +35,6 @@ void toBinaryVector() {
            std::istringstream is( line );
            all_integers[i] = new std::vector<int>( std::istream_iterator<int>(is),
                                     endIterator);
-
            i++;
         }
 
@@ -87,9 +84,6 @@ void toBinaryArrayInt() {
             }
         }
 
-        /*for(unsigned int j = 0; j < QTD_LINHAS; ++j){
-            fout.write((char*)all_integers[j], sizeof(int)*QTD_COLUNAS);
-        }*/
         for(unsigned int j = 0; j < QTD_LINHAS; ++j){
             for( unsigned int k =0; k < QTD_COLUNAS; ++k){
             	fout.write((char*)&all_integers[j][k], sizeof(int));

@@ -31,3 +31,13 @@
 .cproject
 .project
 .settings/
+
+# Qt File
+*.pro
+*.pro.user
+*/build-*/
+build-*/
+
+# My files
+*/debug/
+*/release/

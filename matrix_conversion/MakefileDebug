@@ -1,0 +1,26 @@
+# -c 
+# Not to run the linker. 
+#
+# -pipe
+# Use pipes rather than temporary files for communication between the various stages of compilation. This
+# fails to work on some systems where the assembler is unable to read from a pipe; but the GNU assembler has
+# no trouble.
+#
+# -Wall
+# This enables all the warnings about constructions. Turns on the following warning flags:
+#
+# -Waddress -Warray-bounds (only with -O2) -Wc++0x-compat -Wchar-subscripts -Wimplicit-int 
+# -Wimplicit-function-declaration -Wcomment -Wformat -Wmain (only for C/ObjC and unless -ffreestanding) 
+# -Wmissing-braces -Wnonnull -Wparentheses -Wpointer-sign -Wreorder -Wreturn-type -Wsequence-point 
+# -Wsign-compare (only in C ++ ) -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized 
+# -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wvolatile-register-var
+########################
+
+all:
+	mkdir debug
+	g++ -c -pipe -g -Wall -W -I. -o debug/main.o main.cpp
+	g++ -o debug/matrix_conversion main.o
+
+clean:
+	rm -f debug/*.o
+	rm -f debug/matrix_conversion

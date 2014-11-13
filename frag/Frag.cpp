@@ -1,4 +1,4 @@
-#include <iostream> 
+#include <iostream>
 #include <sstream> 
 #include <fstream> 
 #include <string>
@@ -8,6 +8,10 @@
 #include <cstring>
 #include <cmath>
 #include <cinttypes>
+
+#ifndef WIN_32
+    #include <sys/time.h>
+#endif
 
 #define DEBUG false
 #define ONLINE_DEBUG false
@@ -107,7 +111,7 @@ int main(int argc, char **argv)
 
 	// mark start time
 	prev_time = new timeval();
-	gettimeofdayM(prev_time, NULL);
+    gettimeofdayM(prev_time, NULL);
 
 	// init vars
 	n_dimensions = 0;
@@ -156,7 +160,7 @@ int main(int argc, char **argv)
 void read_datafile(char *filename) 
 {
 	FILE *f;
-    std::int64_t temp, index, size, word;
+    std::int64_t temp, index, size;
 	//char line[MAX_LINE_LENGTH], *word;
 	cell *c;
 
@@ -975,7 +979,7 @@ cell* online_cell_of(node *local_root, std::int64_t *cell_name, std::int64_t nam
 void elapsed_time(timeval *st) 
 {
 	timeval *et = new timeval();
-	gettimeofdayM(et, NULL);
+    gettimeofdayM(et, NULL);
 	long time = 1000 * (et->tv_sec - st->tv_sec) + (et->tv_usec -
 			st->tv_usec)/1000;
 	cout << " ... used time: " << time << " ms." << endl;
@@ -985,13 +989,13 @@ void elapsed_time(timeval *st)
 
 void mark_time(timeval *st) 
 {
-	gettimeofdayM(st, NULL);
+    gettimeofdayM(st, NULL);
 }
 
 void time_taken(timeval *st)
 {
 	timeval *et = new timeval();
-	gettimeofdayM(et, NULL);
+    gettimeofdayM(et, NULL);
 	long time = 1000 * (et->tv_sec - st->tv_sec) + (et->tv_usec -
 			st->tv_usec)/1000;
 	cout << time << " ms." << endl;
@@ -1002,7 +1006,7 @@ void time_taken(timeval *st)
 void exp_time_taken(timeval *st)
 {
 	timeval *et = new timeval();
-	gettimeofdayM(et, NULL);
+    gettimeofdayM(et, NULL);
 	long time = 1000 * (et->tv_sec - st->tv_sec) + (et->tv_usec -
 			st->tv_usec)/1000;
 	cout << time << " ms." << endl;
@@ -1923,6 +1927,7 @@ string itos(std::int64_t n)
 
 std::int64_t gettimeofdayM(struct timeval *tv, struct timezone2 *tz)
 {
+#ifdef WIN_32
   FILETIME ft;
   std::uint64_t tmpres = 0;
   static std::int64_t tzflag;
@@ -1936,7 +1941,7 @@ std::int64_t gettimeofdayM(struct timeval *tv, struct timezone2 *tz)
     tmpres |= ft.dwLowDateTime;
 
     /*converting file time to unix epoch*/
-    tmpres -= DELTA_EPOCH_IN_MICROSECS; 
+    tmpres -= DELTA_EPOCH_IN_MICROSECS;
     tmpres /= 10;  /*convert into microseconds*/
     tv->tv_sec = (long)(tmpres / 1000000UL);
     tv->tv_usec = (long)(tmpres % 1000000UL);
@@ -1952,7 +1957,9 @@ std::int64_t gettimeofdayM(struct timeval *tv, struct timezone2 *tz)
     tz->tz_minuteswest = _timezone / 60;
     tz->tz_dsttime = _daylight;
   }
-
+#else
+    gettimeofday(tv, NULL);
+#endif
   return 0;
 }
 

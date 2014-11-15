@@ -60,6 +60,7 @@ void exp_time_taken(timeval*);
 int minsup;
 int n_dimensions;
 int n_tuples;
+int numero_coluna;
 int *cardinality;
 node *root;
 timeval *prev_time;
@@ -80,8 +81,8 @@ int main(int argc, char **argv)
     int *cell_name;
     vector< int > cuboid_name;
 
-    if (argc != 4) {
-        cout << argv[0] << " <datafile> <minsup> <fragment size>" << endl;
+    if (argc != 5) {
+        cout << argv[0] << " <datafile> <minsup> <fragment size> <numero_coluna>" << endl;
         exit(1);
     }
 
@@ -95,6 +96,7 @@ int main(int argc, char **argv)
     n_dimensions = 0;
     minsup = atoi(argv[2]);
     frag_size = atoi(argv[3]);
+    numero_coluna = atoi(argv[4]);
 
     // read data file
     read_datafile(argv[1]);
@@ -139,43 +141,28 @@ void read_datafile(char *filename)
 {
     FILE *f;
     int temp, index, size;
-    char line[MAX_LINE_LENGTH], *word;
     cell *c;
 
     // open data file
-    if ((f = fopen(filename, "r")) == NULL) {
+    if ((f = fopen(filename, "rb")) == NULL) {
         printf("Error: cannot open file %s.\n", filename);
         exit(-1);
     }
 
     // read first line of data file
-    fgets(line, MAX_LINE_LENGTH, f);
-
-    // read in the number of tuples
-    word = strtok(line, " ");
-    n_tuples = atoi(word);
-
-    n_dimensions = 0;
-    word = strtok(NULL, " ");
-
-    // count the number of dimensions
-    while (word != NULL && (0 != strcmp(word, "\n"))) {
-        n_dimensions++;
-        word = strtok(NULL, " ");
-    }
-
-    // rewind to beginning of line and skip to next word
-    rewind(f);
-    fgets(line, MAX_LINE_LENGTH, f);
-    word = strtok(line, " ");
+    fread(&n_tuples, sizeof(int), 1, f);
+    n_dimensions = numero_coluna;
 
     // store the cardinality and offset of each dimension
     cardinality = new int[n_dimensions];
 
     // read cardinalities
+    int temp2;
     for (int i = 0; i < n_dimensions; i++) {
-        word = strtok(NULL, " ");
-        cardinality[i] = atoi(word) + 1;
+        //word = strtok(NULL, " ");
+        //cardinality[i] = atoi(word) + 1;
+        fread(&temp2, sizeof(int), 1, f);
+        cardinality[i] = temp2 + 1;
     }
 
     if (DEBUG) {
@@ -265,12 +252,12 @@ void read_datafile(char *filename)
     // read in all data into the one-dimensional cells
     for (int i = 0; i < n_tuples; i++) {
 
-        fgets(line, MAX_LINE_LENGTH, f);
-
-        word = strtok(line, " ");
+        //word = strtok(line, " ");
 
         for (int j = 0; j < n_dimensions; j++) {
-            temp = atoi(word);
+            //temp = atoi(word);
+            fread(&temp2, sizeof(int), 1, f);
+            temp = temp2;
 
             // find the cell for this entry
             c = root->child[frag[j]]->child[frag_index[j]]->cells[temp];
@@ -306,7 +293,8 @@ void read_datafile(char *filename)
                 c->num_trans++;
             }
 
-            word = strtok(NULL, " ");
+            //word = strtok(NULL, " ");
+            //fread(&temp2, sizeof(int), 1, f);
         }
     }
 

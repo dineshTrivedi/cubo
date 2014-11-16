@@ -14,6 +14,7 @@ host$ sudo apt-get update
 host$ sudo apt-get install g++-4.9
 
 Remaking g++ symbolic link
+
 host$ cd /usr/bin
 host$ sudo rm g++
 host$ sudo ln -s g++-4.9 g++

@@ -1,8 +1,8 @@
 # cubo
 
-frag: Chinese code
-matrix_conversion: convert plain text to binary file (and other options)
-matrix_sample: Plain text sample
+* frag: Chinese code
+* matrix_conversion: convert plain text to binary file (and other options)
+* matrix_sample: Plain text sample
 
 ## Ubuntu 14.04 x64
 ### Updating g++ to 4.9
